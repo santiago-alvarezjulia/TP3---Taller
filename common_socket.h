@@ -12,13 +12,14 @@ class Socket {
 	public:
 		Socket();
 		
+		int bind_and_listen(const char* port);
 		int connect_(const char* hostname, const char* service_name);
+		int accept_(Socket& new_socket);
+		
 		int send_(unsigned char* chunk, int sizeof_chunk);
 		int receive_(unsigned char* chunk, int sizeof_chunk);
-		int bind_and_listen(const char* port);
-		int accept_(Socket& new_socket);
-		void shutdown_rw();
 		
+		void shutdown_rw();
 		~Socket();
 };
 

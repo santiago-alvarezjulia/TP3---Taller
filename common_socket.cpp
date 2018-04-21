@@ -10,7 +10,7 @@
 #include "common_socket.h"
 #define OK 0
 #define ERROR -1
-#define MAX_CLIENTS_WAITING 5
+#define MAX_CLIENTS_WAITING 10
 
 
 Socket::Socket() {
@@ -97,6 +97,7 @@ int Socket::accept_(Socket& new_socket){
 	if (s < 0) {
 		return ERROR;
 	}
+	close(new_socket.socket_fd);
 	new_socket.socket_fd = s;
 	return OK;
 }
