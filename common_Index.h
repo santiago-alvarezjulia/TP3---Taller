@@ -1,22 +1,25 @@
 #ifndef INDEX_H
 #define INDEX_H
 
-#include <unordered_map>
+#include <map>
 #include <string>
 #include <vector>
-using std::unordered_map;
+using std::map;
 using std::string;
 using std::vector;
 
 class Index {
-    unordered_map<string, vector<string>> map_files;
-    unordered_map<string, vector<string>> map_tags;
+    map<string, vector<string>> map_files;
+    map<string, vector<string>> map_tags;
+    string index_namefile;
+    void initialize_index(string index_namefile);
     
     public:
-		Index();
+		Index(string index_namefile);
 		
 		void add_tag(string tag, vector<string> hashes);
 		void add_file(string namefile, vector<string> hashes);
+		void overwrite();
 		
 		~Index();
 };

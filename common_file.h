@@ -19,6 +19,7 @@ class File {
 		string get_name();
 		void get_line(string& line); // cambiar por lo que devuelve getline
 		void read(char* buffer, size_t n);
+		void write(string buffer);
 		size_t tell_g();
 		void seek_g(size_t a, std::ios_base::seekdir dir);
 		~File();

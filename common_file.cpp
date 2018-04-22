@@ -63,6 +63,11 @@ void File::read(char* byte_leido, size_t n) {
 }
 
 
+void File::write(string buffer) {
+	this->file.write(buffer.c_str(), buffer.size());
+}
+
+
 size_t File::tell_g() {
 	return this->file.tellg();
 } 
