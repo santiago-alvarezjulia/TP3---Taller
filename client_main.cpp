@@ -20,11 +20,11 @@ int main(int argc, char* argv []) {
 	
 	Client client(socket_client);
 	if (found == 0) {
-		client.pull();
+		client.pull(argv[4]);
 	} else if (found == 4) {
 		client.tag();
 	} else {
-		client.push();
+		client.push(argv[4], argv[5]);
 	}
 	
 	return OK;

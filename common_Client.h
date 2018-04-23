@@ -9,9 +9,9 @@ class Client {
 	public:
 		Client(Socket& sock);
 		
-		void pull();
+		void push(char* filename, char* hash);
 		void tag();
-		void push();
+		void pull(char* tag);
 		
 		~Client();
 };
