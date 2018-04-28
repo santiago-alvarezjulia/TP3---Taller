@@ -3,6 +3,8 @@
 #include <vector>
 #include <map>
 #include <algorithm>
+#include <utility>
+#include <string>
 using std::vector;
 using std::map;
 using std::pair;
@@ -13,8 +15,8 @@ using std::ios;
 Index::Index(string index_name) : index_namefile(index_name) {
 	map<string, vector<string>> map_f;
 	map<string, vector<string>> map_t;
-	this->map_files = map_f;
-	this->map_tags = map_t;
+	this->hashes_by_file = map_f;
+	this->hashes_by_tag = map_t;
 	this->initialize_index(index_name);
 }
 
@@ -71,22 +73,41 @@ void Index::initialize_index(string index_name) {
 		vector<string> hashes;
 		// falta agregar los hashes al vector
 		if (type) {
-			this->map_tags.insert(pair<string, vector<string>> (name, hashes));
+			this->hashes_by_tag.insert(pair<string, vector<string>> (name, hashes));
 		} else {
-			this->map_files.insert(pair<string, vector<string>> (name, hashes));
+			this->hashes_by_file.insert(pair<string, vector<string>> (name, hashes));
 		}
 	}
 }
 
 // puede ser que falte verificar algo en los add o simplemente hacer 2
 // bool is_at_index()
+// cambiar los parametros de vectro por string
 void Index::add_tag(string tag, vector<string> hashes) {
-	this->map_tags.insert(pair<string, vector<string>> (tag, hashes));
+	this->hashes_by_tag.insert(pair<string, vector<string>> (tag, hashes));
 }
 
 
 void Index::add_file(string namefile, vector<string> hashes) {
-	this->map_files.insert(pair<string, vector<string>> (namefile, hashes));
+	this->hashes_by_file.insert(pair<string, vector<string>> (namefile, hashes));
+}
+
+
+bool Index::contains_file_and_hash(string filename, string hash) {
+	map<string, vector<string>>::iterator it = this->hashes_by_file.find(filename);
+	if (it != this->hashes_by_file.end()) {
+		if (std::find(it->second.begin(), it->second.end(), hash) 
+		!= it->second.end()) {
+			return true;
+		}
+	}
+	return false;
+}
+
+
+bool Index::contains_tag(string tag) {
+	map<string, vector<string>>::iterator it = this->hashes_by_tag.find(tag);
+	return it != this->hashes_by_file.end();
 }
 
 
@@ -94,8 +115,8 @@ void Index::overwrite() {
 	std::ios_base::openmode flags = ios::out | ios::trunc;
 	File index(this->index_namefile.c_str(), flags);
 	
-	for (map<string, vector<string>>::iterator it = this->map_files.begin(); 
-	it != this->map_files.end(); ++it) {
+	for (map<string, vector<string>>::iterator it = this->hashes_by_file.begin(); 
+	it != this->hashes_by_file.end(); ++it) {
 		string line;
 		line += string("t ");
 		line += it->first;
@@ -113,8 +134,8 @@ void Index::overwrite() {
 		index.write(line);
 	}
 	
-	for (map<string, vector<string>>::iterator it = this->map_tags.begin(); 
-	it != this->map_tags.end(); ++it) {
+	for (map<string, vector<string>>::iterator it = this->hashes_by_tag.begin(); 
+	it != this->hashes_by_tag.end(); ++it) {
 		string line;
 		line += string("f ");
 		line += it->first;

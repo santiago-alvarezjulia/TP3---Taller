@@ -8,13 +8,15 @@
 
 class Socket {
 	int socket_fd;
+	Socket(int fd);
 	
 	public:
 		Socket();
+		Socket(Socket&& socket);
 		
 		int bind_and_listen(const char* port);
 		int connect_(const char* hostname, const char* service_name);
-		int accept_(Socket& new_socket);
+		Socket accept_();
 		
 		int send_(unsigned char* chunk, int sizeof_chunk);
 		int receive_(unsigned char* chunk, int sizeof_chunk);

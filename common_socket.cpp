@@ -7,6 +7,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <iostream>
 #include "common_socket.h"
 #define OK 0
 #define ERROR -1
@@ -21,6 +22,16 @@ Socket::Socket() {
 	}
 	this->socket_fd = sock;
     //return OK;
+}
+
+
+Socket::Socket(int fd) {
+	this->socket_fd = fd;
+}
+
+Socket::Socket(Socket&& other) {
+	this->socket_fd = std::move(other.socket_fd);
+	other.socket_fd = -1;
 }
 
 
@@ -92,14 +103,12 @@ int Socket::bind_and_listen(const char* port) {
 	return OK;
 }
 
-int Socket::accept_(Socket& new_socket){
+Socket Socket::accept_(){
 	int s = accept(this->socket_fd, NULL, NULL);
 	if (s < 0) {
 		return ERROR;
 	}
-	close(new_socket.socket_fd);
-	new_socket.socket_fd = s;
-	return OK;
+	return std::move(Socket(s));
 }
 
 
@@ -134,5 +143,6 @@ void Socket::shutdown_rw() {
 
 
 Socket::~Socket() {
+	std::cout << "OIABOUABGO" << std::endl;
 	close(this->socket_fd);
 }
