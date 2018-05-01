@@ -13,6 +13,8 @@ class Socket {
 	public:
 		Socket();
 		Socket(Socket&& socket);
+		Socket(const Socket&) = delete;
+		Socket& operator=(const Socket&) = delete;
 		
 		int bind_and_listen(const char* port);
 		int connect_(const char* hostname, const char* service_name);

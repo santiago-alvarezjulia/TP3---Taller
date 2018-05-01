@@ -18,7 +18,6 @@ void Multi_Client_Acceptor::run() {
 	main_socket.bind_and_listen(this->port);
 	
 	while (true) {
-		std::cout << "HEHE" << std::endl;
 		Socket asoc = main_socket.accept_();
 		this->threads.push_back(new Server(asoc, this->index_file));
 		this->threads[this->threads.size() - 1]->start();
@@ -29,7 +28,6 @@ void Multi_Client_Acceptor::run() {
 				delete this->threads[i];
 			}
 		}
-		std::cout << "OPOP" << std::endl;
 	}
 	main_socket.shutdown_rw();
 }

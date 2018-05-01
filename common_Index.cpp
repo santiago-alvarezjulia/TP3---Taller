@@ -131,7 +131,7 @@ void Index::overwrite() {
 			}
 		}
 		line += string(";\n");
-		index.write(line);
+		index << line;
 	}
 	
 	for (map<string, vector<string>>::iterator it = this->hashes_by_tag.begin(); 
@@ -150,7 +150,7 @@ void Index::overwrite() {
 			}
 		}
 		line += ";\n";
-		index.write(line);
+		index << line;
 	}
 }
 

@@ -18,10 +18,9 @@ Socket::Socket() {
 	int sock = socket(AF_INET, SOCK_STREAM, 0);  
 	if (sock < 0) {
 		fprintf(stderr, "Error: %s\n", strerror(errno));
-		//return ERROR;
+		// excepcion
 	}
 	this->socket_fd = sock;
-    //return OK;
 }
 
 
@@ -30,7 +29,7 @@ Socket::Socket(int fd) {
 }
 
 Socket::Socket(Socket&& other) {
-	this->socket_fd = std::move(other.socket_fd);
+	this->socket_fd = other.socket_fd;
 	other.socket_fd = -1;
 }
 
@@ -143,6 +142,5 @@ void Socket::shutdown_rw() {
 
 
 Socket::~Socket() {
-	std::cout << "OIABOUABGO" << std::endl;
 	close(this->socket_fd);
 }

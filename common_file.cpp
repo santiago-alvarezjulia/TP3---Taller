@@ -32,6 +32,10 @@ File& File::operator=(File&& other) {
 	return *this;
 }
 
+void File::operator<<(string str) {
+	this->file << str << std::endl;
+}
+
 
 void File::set_name(string name) {
 	this->filename = name;

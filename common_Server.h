@@ -6,13 +6,13 @@
 #include "common_Index.h"
 
 class Server : public Thread {
-	Socket& socket;
+	Socket socket;
 	Index* index_file;
 	bool is_alive;
 	void pull();
 	void tag();
 	void push();
-	void save_new_file(char* filename, char* content);
+	void save_new_file(unsigned char* filename, unsigned char* content);
 	
 	public:
 		explicit Server(Socket& sock, Index* index_f);
