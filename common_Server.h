@@ -7,7 +7,7 @@
 
 class Server : public Thread {
 	Socket socket;
-	Index* index_file;
+	Index index_file;
 	bool is_alive;
 	void pull();
 	void tag();
@@ -15,7 +15,7 @@ class Server : public Thread {
 	void save_new_file(unsigned char* filename, unsigned char* content);
 	
 	public:
-		explicit Server(Socket& sock, Index* index_f);
+		explicit Server(Socket& sock, Index& index_f);
 		virtual void run() override;
 		bool has_ended();
 		~Server();

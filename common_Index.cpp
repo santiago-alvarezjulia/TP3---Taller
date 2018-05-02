@@ -21,6 +21,13 @@ Index::Index(string index_name) : index_namefile(index_name) {
 }
 
 
+Index::Index(Index&& other) {
+	this->hashes_by_file = other.hashes_by_file;
+	this->hashes_by_tag = other.hashes_by_tag;
+	this->index_namefile = other.index_namefile;
+}
+
+
 void Index::initialize_index(string index_name) {
 	std::ios_base::openmode flags = ios::in;
 	File index(index_name.c_str(), flags);
@@ -128,6 +135,19 @@ bool Index::contains_file_and_hash(string filename, string hash) {
 bool Index::contains_tag(string tag) {
 	map<string, vector<string>>::iterator it = this->hashes_by_tag.find(tag);
 	return it != this->hashes_by_file.end();
+}
+
+
+bool Index::contains_hash_stored(string hash) {
+	for (map<string, vector<string>>::iterator it = this->hashes_by_file.begin(); 
+	it != this->hashes_by_file.end(); ++it) {
+		for (unsigned int i = 0; i < it->second.size(); i++) {
+			if (it->second[i] == hash) {
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
 

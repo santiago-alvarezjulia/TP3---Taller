@@ -16,7 +16,7 @@ int main(int argc, char* argv []) {
 	main_socket.bind_and_listen(argv[POS_PORT]);
 	
 	Multi_Client_Acceptor* thread_acceptor = new Multi_Client_Acceptor
-	(&index_file, main_socket);
+	(index_file, main_socket);
 	thread_acceptor->start();
 	
 	End_App* thread_end_app = new End_App();

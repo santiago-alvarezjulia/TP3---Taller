@@ -1,13 +1,12 @@
 #include "common_file.h"
 #include <iostream>
 #include <string>
-#define ERROR_FOPEN "no se pudo conectar con el dispositivo"
 using std::string;
 
 File::File(const char* name, std::ios_base::openmode flags) {
 	this->file.open(name, flags);
 	if (!this->file) {
-		std::cerr << name << ": " << ERROR_FOPEN << std::endl;
+		// excepcion
 	}
 	this->filename = name;
 }

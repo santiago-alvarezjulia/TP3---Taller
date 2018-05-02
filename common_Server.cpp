@@ -10,6 +10,7 @@
 #define TAG '2'
 #define PULL '3'
 using std::string;
+using std::vector;
 
 /*
  *	FALTA VERIFICAR LOS SEND Y RECEIVE (CUANDO SE QUIERE CERRAR EL PROGRAMA)
@@ -17,18 +18,18 @@ using std::string;
  * 
  */
  
-Server::Server(Socket& sock, Index* index_f) : socket(std::move(sock)) {
-	this->index_file = index_f;
+Server::Server(Socket& sock, Index& index_f) : socket(std::move(sock)), index_file(std::move(index_f)) {
 	this->is_alive = true;
 }
 
 
 void Server::run() {
 	unsigned char function;
-	int i = this->socket.receive_(&function, sizeof(unsigned char));
-	if (i <= 0) {
-		return;
-	}
+	this->socket.receive_(&function, sizeof(unsigned char));
+	//if (i < 0) {
+	//	std::cout << "AAA" << std::endl;
+	//	return;
+	//}
 	
 	if (function == PUSH) {
 		this->push();
@@ -55,7 +56,7 @@ void Server::push() {
 	unsigned char* hash = new unsigned char(*len_hash);
 	this->socket.receive_(hash, *len_hash);
 		
-	if (this->index_file->contains_file_and_hash(
+	if (this->index_file.contains_file_and_hash(
 	string(reinterpret_cast<const char*>(filename)), 
 	string(reinterpret_cast<const char*>(hash)))) {
 		unsigned char invalid = INVALID;
@@ -90,6 +91,56 @@ void Server::save_new_file(unsigned char* filename, unsigned char* content) {
 void Server::tag() {
 	// primero verificar que existan todos los hashes en map->files
 	// Si existen todos, seguir, sino salir
+	bool is_valid = true;
+	
+	unsigned int cant_hashes[1];
+	this->socket.receive_((unsigned char*)cant_hashes, sizeof(unsigned int));
+	
+	unsigned int len_tag[1];
+	this->socket.receive_((unsigned char*)len_tag, sizeof(unsigned int));
+	
+	unsigned char* tag = new unsigned char(*len_tag);
+	this->socket.receive_(tag, *len_tag);
+	
+	if (this->index_file.contains_tag(string(reinterpret_cast<const char*>
+		(tag)))) {
+		is_valid = false;
+	}
+	
+	vector<unsigned char*> hash_vector;
+	for (unsigned int i = 0; i < *cant_hashes; i++) {
+		unsigned int len_hash[1];
+		this->socket.receive_((unsigned char*)len_hash, sizeof(unsigned int));
+	
+		unsigned char* hash = new unsigned char(*len_hash);
+		this->socket.receive_(tag, *len_hash);
+		
+		hash_vector.push_back(hash);
+		
+		if (is_valid) {
+			if (!this->index_file.contains_hash_stored(
+			string(reinterpret_cast<const char*>(hash)))) {
+				is_valid = false;
+			}
+		}
+	}
+	
+	if (is_valid) {
+		for (unsigned int i = 0; i < hash_vector.size(); i++) {
+			this->index_file.add_tag(string(reinterpret_cast<const char*>
+			(tag)), string(reinterpret_cast<const char*>(hash_vector[i])));
+		}
+		unsigned char valid = '1';
+		this->socket.send_(&valid, 1);
+	} else {
+		unsigned char invalid = '0';
+		this->socket.send_(&invalid, 1);
+	}
+	
+	for (unsigned int i = 0; i < hash_vector.size(); i++) {	
+		delete hash_vector[i]; // mirar si se elimina o no del index
+	}
+	delete tag;
 }
 
 
@@ -100,7 +151,7 @@ void Server::pull() {
 	unsigned char* tag = new unsigned char(*len_tag);
 	this->socket.receive_(tag, *len_tag);
 	
-	if (this->index_file->contains_tag(
+	if (this->index_file.contains_tag(
 	string(reinterpret_cast<const char*>(tag)))) {
 		unsigned char invalid = INVALID;
 		this->socket.send_(&invalid, sizeof(unsigned char));
@@ -111,7 +162,7 @@ void Server::pull() {
 		this->socket.send_(&valid, sizeof(unsigned char));
 	}
 	
-	std::vector<string> name_hashes = this->index_file->get_hashes_by_tag(
+	std::vector<string> name_hashes = this->index_file.get_hashes_by_tag(
 	(char*)tag);
 	// envio la cantidad de archivos taggeados
 	unsigned int len_name_hashes = name_hashes.size();

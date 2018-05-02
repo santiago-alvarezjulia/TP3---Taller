@@ -11,7 +11,7 @@ using std::string;
  * 
  */
 
-Client::Client(Socket& sock) : socket(std::move(sock)){}
+Client::Client(Socket& sock) : socket(std::move(sock)) {}
 
 void Client::push(char* filename, char* hash) {
 	unsigned char function = '1';
@@ -62,6 +62,26 @@ void Client::tag(int argc, char* argv []) {
 	// envio el comando codificado con el valor 2
 	unsigned char function = '2';
 	this->socket.send_(&function, 1);
+	
+	unsigned int cant_hashes = argc - 5;
+	this->socket.send_((unsigned char*)&cant_hashes, sizeof(unsigned int));
+	
+	unsigned int len_tag = string((const char*)argv[5]).size();
+	this->socket.send_((unsigned char*)&len_tag, sizeof(unsigned int));
+	this->socket.send_((unsigned char*)&argv[5], len_tag);
+	
+	for (int i = 6; i < argc; i++) {
+		unsigned int len_hash = string((const char*)argv[i]).size();
+		this->socket.send_((unsigned char*)&len_hash, sizeof(unsigned int));
+		this->socket.send_((unsigned char*)&argv[i], len_hash);
+	}
+	
+	unsigned char is_valid;
+	this->socket.receive_(&is_valid, sizeof(unsigned char));
+	
+	if (atoi((const char*)&is_valid) == 0) {
+		std::cerr << "Error: tag/hash incorrecto." << std::endl;
+	}
 }
 
 

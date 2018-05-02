@@ -7,12 +7,12 @@
 #define POS_HOSTNAME 1
 #define POS_PORT 2
 #define POS_FUNCTION 3
+using std::string;
 
 int main(int argc, char* argv []) {
-	std::string functions = std::string("pull") + std::string("tag") + 
-	std::string("push");
-	std::size_t found = functions.find(argv[POS_FUNCTION]);
-	if (found == std::string::npos) {
+	string functions = string("pull") + string("tag") + string("push");
+	size_t found = functions.find(argv[POS_FUNCTION]);
+	if (found == string::npos) {
 		std::cout << "Error: argumentos invalidos." << std::endl;
 		return ERROR;
 	}
@@ -21,11 +21,26 @@ int main(int argc, char* argv []) {
 
 	Client client(socket_client);
 	if (found == 0) {
-		client.pull(argv[4]);
+		if (argc == 5) {
+			client.pull(argv[4]);
+		} else {
+			std::cout << "Error: argumentos invalidos." << std::endl;
+			return ERROR;
+		}
 	} else if (found == 4) {
-		client.tag(argc, argv);
+		if (argc >= 6) {
+			client.tag(argc, argv);
+		} else {
+			std::cout << "Error: argumentos invalidos." << std::endl;
+			return ERROR;
+		}
 	} else {
-		client.push(argv[4], argv[5]);
+		if (argc == 6 ) {
+			client.push(argv[4], argv[5]);
+		} else {
+			std::cout << "Error: argumentos invalidos." << std::endl;
+			return ERROR;
+		}
 	}
 	return OK;
 }

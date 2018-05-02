@@ -13,10 +13,12 @@ class Index {
     
     public:
 		explicit Index(std::string index_namefile);
+		Index(Index&& other);
 		void add_tag(std::string tag, std::string hash);
 		void add_file(std::string namefile, std::string hash);
 		bool contains_file_and_hash(std::string filename, std::string hash);
 		bool contains_tag(std::string tag);
+		bool contains_hash_stored(std::string hash);
 		std::vector<std::string> get_hashes_by_tag(char* tag);
 		void overwrite();
 		~Index();
