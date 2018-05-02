@@ -105,7 +105,7 @@ int Socket::bind_and_listen(const char* port) {
 Socket Socket::accept_(){
 	int s = accept(this->socket_fd, NULL, NULL);
 	if (s < 0) {
-		return ERROR;
+		// excepcion
 	}
 	return std::move(Socket(s));
 }
@@ -142,5 +142,7 @@ void Socket::shutdown_rw() {
 
 
 Socket::~Socket() {
-	close(this->socket_fd);
+	if (this->socket_fd != -1) {
+		close(this->socket_fd);
+	}
 }

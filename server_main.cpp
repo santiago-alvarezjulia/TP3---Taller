@@ -2,6 +2,7 @@
 #include "common_thread.h"
 #include "server_Multi_Client_Acceptor.h"
 #include "server_End_App.h"
+#include <iostream>
 #define OK 0
 #define CANT_MIN_PARAM 3
 #define POS_PORT 1
@@ -11,21 +12,28 @@ int main(int argc, char* argv []) {
 	// primero leo el indice
 	Index index_file(argv[POS_INDEX]);
 	
-	Thread* thread_acceptor = new Multi_Client_Acceptor(argv[POS_PORT], 
-	&index_file);
+	Socket main_socket;
+	main_socket.bind_and_listen(argv[POS_PORT]);
+	
+	Multi_Client_Acceptor* thread_acceptor = new Multi_Client_Acceptor
+	(&index_file, main_socket);
 	thread_acceptor->start();
 	
-	Thread* thread_end_app = new End_App();
+	End_App* thread_end_app = new End_App();
 	thread_end_app->start();
 	
-	// falta ver que cuando termine el thread end_app haga join del thread_acceptor
-	if (((End_App*)thread_end_app)->has_ended()) {
-		thread_acceptor->join();
-		delete thread_acceptor;
+	while (true) {
+		if (thread_end_app->has_ended()) {
+			thread_end_app->join();
+			delete thread_end_app;
+			break;
+		}
 	}
-	thread_end_app->join();
-	delete thread_end_app;
+	thread_acceptor->stop();
+	thread_acceptor->join();
+	delete thread_acceptor;
 	
 	index_file.overwrite();
+
 	return OK;
 }

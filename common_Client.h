@@ -4,10 +4,11 @@
 #include "common_socket.h"
 
 class Client {
-	Socket* socket;
+	Socket socket;
+	void save_new_file(unsigned char* filename, unsigned char* content);
 	
 	public:
-		explicit Client(Socket* sock);
+		explicit Client(Socket& sock);
 		void push(char* filename, char* hash);
 		void tag(int argc, char* argv []);
 		void pull(char* tag);

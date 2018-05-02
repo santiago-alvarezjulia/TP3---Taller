@@ -19,7 +19,7 @@ int main(int argc, char* argv []) {
 	Socket socket_client;
 	socket_client.connect_(argv[POS_HOSTNAME], argv[POS_PORT]);
 
-	Client client(std::move(&socket_client));
+	Client client(socket_client);
 	if (found == 0) {
 		client.pull(argv[4]);
 	} else if (found == 4) {

@@ -8,7 +8,7 @@
 
 class Socket {
 	int socket_fd;
-	Socket(int fd);
+	explicit Socket(int fd);
 	
 	public:
 		Socket();

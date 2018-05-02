@@ -6,30 +6,35 @@
 using std::vector;
 
 
-Multi_Client_Acceptor::Multi_Client_Acceptor(char* port, Index* index_f) {
+Multi_Client_Acceptor::Multi_Client_Acceptor(Index* index_f, Socket& sock) 
+: main_socket(std::move(sock)){
 	this->index_file = index_f;
-	this->port = port;
+	this->is_alive = true;
 	vector<Thread*> threads;
 	this->threads = threads;
 }
 
 void Multi_Client_Acceptor::run() {
-	Socket main_socket;
-	main_socket.bind_and_listen(this->port);
-	
-	while (true) {
-		Socket asoc = main_socket.accept_();
+	while (is_alive) {
+		Socket asoc = this->main_socket.accept_();
+		if (!is_alive) {
+			break;
+		}
 		this->threads.push_back(new Server(asoc, this->index_file));
 		this->threads[this->threads.size() - 1]->start();
-		
+		/*
 		for (size_t i = 0; i < this->threads.size(); i++) {
 			if (((Server*)this->threads[i])->has_ended()) {
 				this->threads[i]->join();
 				delete this->threads[i];
 			}
-		}
+		}*/
 	}
-	main_socket.shutdown_rw();
+}
+
+void Multi_Client_Acceptor::stop() {
+	this->main_socket.shutdown_rw();
+	this->is_alive = false;
 }
 
 Multi_Client_Acceptor::~Multi_Client_Acceptor() {

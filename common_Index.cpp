@@ -55,7 +55,7 @@ void Index::initialize_index(string index_name) {
 				break;
 			}
 		}
-		
+		// salteo la palabra hash
 		for (size_t i = pos_in_line + 1; i < line.size(); i++) {
 			if (line[i] ==	' ') {
 				pos_in_line = i;
@@ -63,15 +63,31 @@ void Index::initialize_index(string index_name) {
 			}
 		}
 		
-		for (size_t i = pos_in_line + 1; i < line.size(); i++) {
-			if (line[i] !=	' ') {
-				pos_in_line = i;
+		vector<string> hashes;
+		while (true) {
+			string hash;
+			size_t i = pos_in_line;
+			for (;i < line.size(); i++) {
+				if (line[i] !=	' ') {
+					pos_in_line = i;
+					break;
+				}
+			}
+			
+			for (; i < line.size(); i++) {
+				if (line[i] ==	' ' && name.size() > 0) {
+					pos_in_line = i;
+					hashes.push_back(hash);
+					break;
+				} else if (line[i] != ' ') {
+					hash.push_back(line[i]);
+				}
+			}
+			if (i == line.size()) {
 				break;
 			}
 		}
-		
-		vector<string> hashes;
-		// falta agregar los hashes al vector
+		// falta parsear y agregar los hashes al vector
 		if (type) {
 			this->hashes_by_tag.insert(pair<string, vector<string>> (name, hashes));
 		} else {
@@ -80,16 +96,20 @@ void Index::initialize_index(string index_name) {
 	}
 }
 
-// puede ser que falte verificar algo en los add o simplemente hacer 2
-// bool is_at_index()
-// cambiar los parametros de vectro por string
-void Index::add_tag(string tag, vector<string> hashes) {
-	this->hashes_by_tag.insert(pair<string, vector<string>> (tag, hashes));
+
+void Index::add_tag(string tag, string hash) {
+	map<string, vector<string>>::iterator it = this->hashes_by_tag.find(tag);
+	if (it != this->hashes_by_tag.end()) {
+		it->second.push_back(hash);
+	}
 }
 
 
-void Index::add_file(string namefile, vector<string> hashes) {
-	this->hashes_by_file.insert(pair<string, vector<string>> (namefile, hashes));
+void Index::add_file(string namefile, string hash) {
+	map<string, vector<string>>::iterator it = this->hashes_by_file.find(namefile);
+	if (it != this->hashes_by_file.end()) {
+		it->second.push_back(hash);
+	}
 }
 
 
@@ -152,6 +172,12 @@ void Index::overwrite() {
 		line += ";\n";
 		index << line;
 	}
+}
+
+
+std::vector<std::string> Index::get_hashes_by_tag(char* tag) {
+	map<string, vector<string>>::iterator it = this->hashes_by_tag.find(tag);
+	return it->second;
 }
 
 
