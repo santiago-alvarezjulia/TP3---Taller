@@ -26,7 +26,7 @@ Server::Server(Socket& sock, Index& index_f) : socket(std::move(sock)), index_fi
 void Server::run() {
 	unsigned char function;
 	int i = this->socket.receive_(&function, sizeof(unsigned char));
-	if (i <= 0) {
+	if (i == 0) {
 		return;
 	}
 	
@@ -51,10 +51,10 @@ void Server::push() {
 	
 	unsigned int len_hash [1];
 	this->socket.receive_((unsigned char*)len_hash, sizeof(unsigned int));
-	
+
 	unsigned char* hash = new unsigned char(*len_hash);
 	this->socket.receive_(hash, *len_hash);
-		
+
 	if (this->index_file.contains_file_and_hash(
 	string(reinterpret_cast<const char*>(filename)), 
 	string(reinterpret_cast<const char*>(hash)))) {
@@ -82,7 +82,7 @@ void Server::push() {
 
 
 void Server::save_new_file(unsigned char* filename, unsigned char* content) {
-	File file((char*)filename, std::ios::out);
+	File file((char*)filename, std::ios::out | std::ios::binary);
 	file << string(reinterpret_cast<const char*>(content));
 }
 
@@ -103,25 +103,26 @@ void Server::tag() {
 		(tag)))) {
 		is_valid = false;
 	}
-	
+
 	vector<unsigned char*> hash_vector;
 	for (unsigned int i = 0; i < *cant_hashes; i++) {
 		unsigned int len_hash[1];
 		this->socket.receive_((unsigned char*)len_hash, sizeof(unsigned int));
-	
+
 		unsigned char* hash = new unsigned char(*len_hash);
 		this->socket.receive_(tag, *len_hash);
-		
+
 		hash_vector.push_back(hash);
 		
 		if (is_valid) {
 			if (!this->index_file.contains_hash_stored(
 			string(reinterpret_cast<const char*>(hash)))) {
+				// aca falla por recibir mal el hash
 				is_valid = false;
 			}
 		}
 	}
-	std::cout << "AAAA" << std::endl;
+
 	if (is_valid) {
 		for (unsigned int i = 0; i < hash_vector.size(); i++) {
 			this->index_file.add_tag(string(reinterpret_cast<const char*>
@@ -133,7 +134,7 @@ void Server::tag() {
 		unsigned char invalid = '0';
 		this->socket.send_(&invalid, 1);
 	}
-	std::cout << is_valid << std::endl;
+
 	for (unsigned int i = 0; i < hash_vector.size(); i++) {	
 		delete hash_vector[i]; // mirar si se elimina o no del index
 	}

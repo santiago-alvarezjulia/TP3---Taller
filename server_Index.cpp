@@ -1,5 +1,6 @@
 #include "server_Index.h"
 #include "common_file.h"
+#include <iostream>
 #include <vector>
 #include <map>
 #include <algorithm>
@@ -134,7 +135,7 @@ bool Index::contains_file_and_hash(string filename, string hash) {
 
 bool Index::contains_tag(string tag) {
 	map<string, vector<string>>::iterator it = this->hashes_by_tag.find(tag);
-	return it != this->hashes_by_file.end();
+	return it != this->hashes_by_tag.end();
 }
 
 

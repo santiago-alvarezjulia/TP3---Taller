@@ -14,6 +14,13 @@ using std::string;
 Client::Client(Socket& sock) : socket(std::move(sock)) {}
 
 void Client::push(char* filename, char* hash) {
+	// primero abro y verifico que existe el archivo
+	File file(filename, std::ios::in | std::ios::binary);
+	if (file.fail_open()) {
+		std::cerr << "Error: archivo inexistente." << std::endl;
+		return;
+	}
+		
 	unsigned char function = '1';
 	this->socket.send_(&function, sizeof(unsigned char));
 	
@@ -24,19 +31,13 @@ void Client::push(char* filename, char* hash) {
 	unsigned int len_hash = string((const char*)hash).size();
 	this->socket.send_((unsigned char*)&len_hash, sizeof(unsigned int));
 	this->socket.send_((unsigned char*)&hash, len_hash);
-	
+
 	// recibo el byte que me indica si es valida la operacion
 	unsigned char is_valid;
 	this->socket.receive_(&is_valid, sizeof(unsigned char));
 	
 	if (atoi((const char*)&is_valid) == 1) {
 		// envio el archivo.
-		File file(filename, std::ios::in);
-		if (file.fail_open()) {
-			std::cerr << "Error: archivo inexistente." << std::endl;
-			return;
-		}
-		
 		std::ios_base::seekdir end = std::ios::end;
 		std::ios_base::seekdir begin = std::ios::beg;
 		std::ios_base::seekdir current = std::ios::cur;
@@ -64,22 +65,20 @@ void Client::tag(int argc, char* argv []) {
 	this->socket.send_(&function, 1);
 	
 	unsigned int cant_hashes = argc - 5;
-	std::cout << cant_hashes << std::endl;
 	this->socket.send_((unsigned char*)&cant_hashes, sizeof(unsigned int));
 	
-	unsigned int len_tag = string((const char*)argv[5]).size();
+	unsigned int len_tag = string((const char*)argv[4]).size();
 	this->socket.send_((unsigned char*)&len_tag, sizeof(unsigned int));
-	this->socket.send_((unsigned char*)&argv[5], len_tag);
-	
-	for (int i = 6; i < argc; i++) {
+	this->socket.send_((unsigned char*)&argv[4], len_tag);
+
+	for (int i = 5; i < argc; i++) {
 		unsigned int len_hash = string((const char*)argv[i]).size();
 		this->socket.send_((unsigned char*)&len_hash, sizeof(unsigned int));
 		this->socket.send_((unsigned char*)&argv[i], len_hash);
 	}
-	std::cout << cant_hashes << std::endl;
 	unsigned char is_valid;
 	this->socket.receive_(&is_valid, sizeof(unsigned char));
-	std::cout << cant_hashes << std::endl;
+
 	if (atoi((const char*)&is_valid) == 0) {
 		std::cerr << "Error: tag/hash incorrecto." << std::endl;
 	}
@@ -124,6 +123,8 @@ void Client::pull(char* tag) {
 			delete filename;
 			delete file;
 		}
+	} else {
+		std::cerr << "Error: tag/hash incorrecto." << std::endl;
 	}
 }
 

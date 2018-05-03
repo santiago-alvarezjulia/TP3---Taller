@@ -1,0 +1,5 @@
+f A c1 g1 z1 ;
+f caminante 3117 ;
+t v1-lts 3117 ;
+t v1.2 3117 c1 ;
+t v2.0 3117 g1 ;

@@ -128,9 +128,15 @@ int Socket::receive_(unsigned char* chunk, int sizeof_chunk) {
 			bytes_recibidos += s;
 		}
 	}	
-		
+	
 	if (!is_open_socket && is_valid_socket) {
 		return bytes_recibidos;
+	}
+	if (!is_valid_socket) {
+		return ERROR;
+	}
+	if (!is_open_socket) {
+		return OK;
 	}
 	return ERROR;
 }
