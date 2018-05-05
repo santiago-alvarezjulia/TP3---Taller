@@ -16,6 +16,7 @@ class Index {
 		Index(Index&& other);
 		void add_tag(std::string tag, std::string hash);
 		void add_file(std::string namefile, std::string hash);
+		std::string get_namefile_by_hash(std::string hash);
 		bool contains_file_and_hash(std::string filename, std::string hash);
 		bool contains_tag(std::string tag);
 		bool contains_hash_stored(std::string hash);

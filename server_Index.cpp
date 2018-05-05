@@ -114,7 +114,23 @@ void Index::add_file(string namefile, string hash) {
 	map<string, vector<string>>::iterator it = this->hashes_by_file.find(namefile);
 	if (it != this->hashes_by_file.end()) {
 		it->second.push_back(hash);
+	} else {
+		vector<string> hashes;
+		this->hashes_by_file.insert(std::pair<string,vector<string>>(namefile, hashes));
+		this->add_file(namefile, hash);
 	}
+}
+
+
+string Index::get_namefile_by_hash(string hash) {
+	for (map<string, vector<string>>::iterator it = this->hashes_by_file.begin(); 
+	it != this->hashes_by_file.end(); ++it) {
+		if (std::find(it->second.begin(), it->second.end(), hash) 
+		!= it->second.end()) {
+			return it->first;
+		}
+	}
+	return string();
 }
 
 

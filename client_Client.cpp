@@ -15,7 +15,7 @@ Client::Client(Socket& sock) : socket(std::move(sock)) {}
 
 void Client::push(char* filename, char* hash) {
 	// primero abro y verifico que existe el archivo
-	File file(filename, std::ios::in | std::ios::binary);
+	File file(filename, std::ios::in);
 	if (file.fail_open()) {
 		std::cerr << "Error: archivo inexistente." << std::endl;
 		return;
@@ -26,11 +26,11 @@ void Client::push(char* filename, char* hash) {
 	
 	unsigned int len_filename = string((const char*)filename).size();
 	this->socket.send_((unsigned char*)&len_filename, sizeof(unsigned int));
-	this->socket.send_((unsigned char*)filename, len_filename);
+	this->socket.send_((unsigned char*)filename, len_filename * sizeof(unsigned char));
 
 	unsigned int len_hash = string((const char*)hash).size();
 	this->socket.send_((unsigned char*)&len_hash, sizeof(unsigned int));
-	this->socket.send_((unsigned char*)hash, len_hash);
+	this->socket.send_((unsigned char*)hash, len_hash * sizeof(unsigned char));
 
 	// recibo el byte que me indica si es valida la operacion
 	unsigned char is_valid;
@@ -50,9 +50,9 @@ void Client::push(char* filename, char* hash) {
 		unsigned int len_file = pos_final_archivo;
 		this->socket.send_((unsigned char*)&len_file, sizeof(unsigned int));
 		
-		char* file_content = new char(len_file);
-		file.read(file_content, len_file);
-		this->socket.send_((unsigned char*)file_content, len_file);
+		unsigned char* file_content = new unsigned char(len_file);
+		file.read((char*)file_content, len_file);
+		this->socket.send_(file_content, len_file * sizeof(unsigned char));
 		
 		//delete file_content;
 	}
@@ -102,7 +102,7 @@ void Client::pull(char* tag) {
 		// recibo la cantidad de archivos taggeados
 		unsigned int cant_hashes [1];
 		this->socket.receive_((unsigned char*)cant_hashes, sizeof(unsigned int));
-		
+
 		// recibo los archivos taggeados.
 		for (unsigned int i = 0; i < *cant_hashes; i++) {
 			// recibo el nombre de hash

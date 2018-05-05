@@ -44,20 +44,17 @@ void Server::run() {
 
 void Server::push() {
 	// recibo el hash y su longitud
-	unsigned int len_filename[4];
+	unsigned int len_filename[1];
 	this->socket.receive_((unsigned char*)len_filename, sizeof(unsigned int));
 		
 	unsigned char* filename = new unsigned char(*len_filename);
-	this->socket.receive_(filename, *len_filename);
+	this->socket.receive_(filename, *len_filename * sizeof(unsigned char));
 	
-	std::cout << *len_filename << std::endl;
-	std::cout << filename << std::endl;
-	
-	unsigned int len_hash [4];
+	unsigned int len_hash [1];
 	this->socket.receive_((unsigned char*)len_hash, sizeof(unsigned int));
 
 	unsigned char* hash = new unsigned char(*len_hash);
-	this->socket.receive_(hash, *len_hash);
+	this->socket.receive_(hash, *len_hash * sizeof(unsigned char));
 
 	if (this->index_file.contains_file_and_hash(
 	string(reinterpret_cast<const char*>(filename)), 
@@ -71,27 +68,31 @@ void Server::push() {
 		this->socket.send_(&valid, sizeof(unsigned char));
 	}
 	
-	unsigned int len_file[4];
+	unsigned int len_file[1];
 	this->socket.receive_((unsigned char*)len_file, sizeof(unsigned int));
 
 	unsigned char* file = new unsigned char(*len_file);
-	this->socket.receive_(file, *len_file);
+	this->socket.receive_(file, *len_file * sizeof(unsigned char));
 
 	std::cout << file << std::endl;
 	this->save_new_file(hash, file); 
-
+	
+	this->index_file.add_file(string(reinterpret_cast<const char*>(filename)), 
+	string(reinterpret_cast<const char*>(hash)));
+	
 	//delete file;
-	//delete filename;
-	//delete hash;
+	delete filename;
+	delete hash;
+
+	//this->index_file.overwrite();
 }
 
 
-void Server::save_new_file(unsigned char* filename, unsigned char* content) {
-	File file((char*)filename, std::ios::out);
-	std::cout << content << std::endl;
-	std::cout << "JA";
-	file << content;
-	std::cout << "VA" << std::endl;
+void Server::save_new_file(unsigned char* filename, unsigned char* file) {
+	std::cout << file << std::endl;
+	File f((char*)filename, std::ios::out);
+	std::cout << file << std::endl;
+	f << file;
 }
 
 
@@ -143,11 +144,11 @@ void Server::tag() {
 	}
 
 	for (unsigned int i = 0; i < hash_vector.size(); i++) {	
-		delete hash_vector[i]; // mirar si se elimina o no del index
+		delete hash_vector[i];
 	}
 	delete tag;
 	
-	this->index_file.overwrite();
+	//this->index_file.overwrite();
 }
 
 
@@ -158,7 +159,7 @@ void Server::pull() {
 	unsigned char* tag = new unsigned char(*len_tag);
 	this->socket.receive_(tag, *len_tag);
 	
-	if (this->index_file.contains_tag(
+	if (!this->index_file.contains_tag(
 	string(reinterpret_cast<const char*>(tag)))) {
 		unsigned char invalid = INVALID;
 		this->socket.send_(&invalid, sizeof(unsigned char));
@@ -174,14 +175,13 @@ void Server::pull() {
 	// envio la cantidad de archivos taggeados
 	unsigned int len_name_hashes = name_hashes.size();
 	this->socket.send_((unsigned char*)&len_name_hashes, sizeof(unsigned int));
-	
+
 	for (unsigned int i = 0; i < name_hashes.size(); i++) {
 		// envio el nombre del archivo
-		unsigned int len_name = name_hashes[i].size();
+		string namefile = this->index_file.get_namefile_by_hash(name_hashes[i]);
+		unsigned int len_name = namefile.size();
 		this->socket.send_((unsigned char*)&len_name, sizeof(unsigned int));
-	
-		unsigned char* name_hash = new unsigned char(len_name);
-		this->socket.receive_(name_hash, len_name);
+		this->socket.send_((unsigned char*)namefile.c_str(), len_name);
 		
 		File file(name_hashes[i].c_str(), std::ios::in);
 		if (file.fail_open()) {
@@ -201,11 +201,10 @@ void Server::pull() {
 		unsigned int len_file = pos_final_archivo;
 		this->socket.send_((unsigned char*)&len_file, sizeof(unsigned int));
 		
-		char* file_content = new char(len_file);
-		file.read(file_content, len_file);
-		this->socket.send_((unsigned char*)file_content, len_file);
+		unsigned char* file_content = new unsigned char(len_file);
+		file.read((char*)file_content, len_file);
+		this->socket.send_(file_content, len_file);
 		
-		delete name_hash;
 		delete file_content;
 	}
 }

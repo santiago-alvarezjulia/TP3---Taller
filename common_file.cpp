@@ -32,7 +32,6 @@ File& File::operator=(File&& other) {
 }
 
 void File::operator<<(unsigned char* str) {
-	std::cout << str << std::endl;
 	this->file << str << std::endl;
 }
 
