@@ -26,11 +26,11 @@ void Client::push(char* filename, char* hash) {
 	
 	unsigned int len_filename = string((const char*)filename).size();
 	this->socket.send_((unsigned char*)&len_filename, sizeof(unsigned int));
-	this->socket.send_((unsigned char*)&filename, len_filename);
+	this->socket.send_((unsigned char*)filename, len_filename);
 
 	unsigned int len_hash = string((const char*)hash).size();
 	this->socket.send_((unsigned char*)&len_hash, sizeof(unsigned int));
-	this->socket.send_((unsigned char*)&hash, len_hash);
+	this->socket.send_((unsigned char*)hash, len_hash);
 
 	// recibo el byte que me indica si es valida la operacion
 	unsigned char is_valid;
@@ -54,7 +54,7 @@ void Client::push(char* filename, char* hash) {
 		file.read(file_content, len_file);
 		this->socket.send_((unsigned char*)file_content, len_file);
 		
-		delete file_content;
+		//delete file_content;
 	}
 }
 
@@ -69,12 +69,12 @@ void Client::tag(int argc, char* argv []) {
 	
 	unsigned int len_tag = string((const char*)argv[4]).size();
 	this->socket.send_((unsigned char*)&len_tag, sizeof(unsigned int));
-	this->socket.send_((unsigned char*)&argv[4], len_tag);
+	this->socket.send_((unsigned char*)argv[4], len_tag);
 
 	for (int i = 5; i < argc; i++) {
 		unsigned int len_hash = string((const char*)argv[i]).size();
 		this->socket.send_((unsigned char*)&len_hash, sizeof(unsigned int));
-		this->socket.send_((unsigned char*)&argv[i], len_hash);
+		this->socket.send_((unsigned char*)argv[i], len_hash);
 	}
 	unsigned char is_valid;
 	this->socket.receive_(&is_valid, sizeof(unsigned char));
@@ -92,7 +92,7 @@ void Client::pull(char* tag) {
 	
 	unsigned int len_tag = string((const char*)tag).size();
 	this->socket.send_((unsigned char*)&len_tag, sizeof(unsigned int));
-	this->socket.send_((unsigned char*)&tag, len_tag);
+	this->socket.send_((unsigned char*)tag, len_tag);
 	
 	// recibo el byte que me indica si es valida la operacion
 	unsigned char is_valid;
@@ -131,7 +131,7 @@ void Client::pull(char* tag) {
 
 void Client::save_new_file(unsigned char* filename, unsigned char* content) {
 	File file((char*)filename, std::ios::out);
-	file << string(reinterpret_cast<const char*>(content));
+	file << content;
 }
 
 

@@ -35,7 +35,7 @@ int main(int argc, char* argv []) {
 			return ERROR;
 		}
 	} else {
-		if (argc == 6 ) {
+		if (argc == 6) {
 			client.push(argv[4], argv[5]);
 		} else {
 			std::cout << "Error: argumentos invalidos." << std::endl;

@@ -56,16 +56,9 @@ void Index::initialize_index(string index_name) {
 				name.push_back(line[i]);
 			}
 		}
-		
+		// salteo espacios entre el namefile y los hashes
 		for (size_t i = pos_in_line + 1; i < line.size(); i++) {
 			if (line[i] !=	' ') {
-				pos_in_line = i;
-				break;
-			}
-		}
-		// salteo la palabra hash
-		for (size_t i = pos_in_line + 1; i < line.size(); i++) {
-			if (line[i] ==	' ') {
 				pos_in_line = i;
 				break;
 			}
@@ -75,7 +68,7 @@ void Index::initialize_index(string index_name) {
 		while (true) {
 			string hash;
 			size_t i = pos_in_line;
-			for (;i < line.size(); i++) {
+			for (; i < line.size(); i++) {
 				if (line[i] !=	' ') {
 					pos_in_line = i;
 					break;
@@ -109,6 +102,10 @@ void Index::add_tag(string tag, string hash) {
 	map<string, vector<string>>::iterator it = this->hashes_by_tag.find(tag);
 	if (it != this->hashes_by_tag.end()) {
 		it->second.push_back(hash);
+	} else {
+		vector<string> hashes;
+		this->hashes_by_tag.insert(std::pair<string,vector<string>>(tag, hashes));
+		this->add_tag(tag, hash);
 	}
 }
 
@@ -159,9 +156,9 @@ void Index::overwrite() {
 	for (map<string, vector<string>>::iterator it = this->hashes_by_file.begin(); 
 	it != this->hashes_by_file.end(); ++it) {
 		string line;
-		line += string("t ");
+		line += string("f ");
 		line += it->first;
-		line += string(" hash ");
+		line += string(" ");
 
 		// ordeno vector de hashes por orden alfabetico y lo sumo a la linea
 		std::sort(it->second.begin(), it->second.end());
@@ -171,16 +168,16 @@ void Index::overwrite() {
 				line += string(" ");
 			}
 		}
-		line += string(";\n");
-		index << line;
+		line += string(";");
+		index << (unsigned char*)line.c_str();
 	}
 	
 	for (map<string, vector<string>>::iterator it = this->hashes_by_tag.begin(); 
 	it != this->hashes_by_tag.end(); ++it) {
 		string line;
-		line += string("f ");
+		line += string("t ");
 		line += it->first;
-		line += string(" hash ");
+		line += string(" ");
 
 		// ordeno vector de hashes por orden alfabetico y lo sumo a la linea
 		std::sort(it->second.begin(), it->second.end());
@@ -190,8 +187,8 @@ void Index::overwrite() {
 				line += string(" ");
 			}
 		}
-		line += ";\n";
-		index << line;
+		line += ";";
+		index << (unsigned char*)line.c_str();
 	}
 }
 
