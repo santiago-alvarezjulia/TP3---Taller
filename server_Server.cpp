@@ -89,9 +89,7 @@ void Server::push() {
 
 
 void Server::save_new_file(unsigned char* filename, unsigned char* file) {
-	std::cout << file << std::endl;
 	File f((char*)filename, std::ios::out);
-	std::cout << file << std::endl;
 	f << file;
 }
 

@@ -66,8 +66,8 @@ void File::read(char* byte_leido, size_t n) {
 }
 
 
-void File::write(string buffer) {
-	this->file.write(buffer.c_str(), buffer.size());
+void File::write(string buffer, int buffer_size) {
+	this->file.write(buffer.c_str(), buffer_size);
 }
 
 
