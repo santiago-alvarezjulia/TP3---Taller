@@ -50,11 +50,11 @@ void Client::push(char* filename, char* hash) {
 		unsigned int len_file = pos_final_archivo;
 		this->socket.send_((unsigned char*)&len_file, sizeof(unsigned int));
 
-		unsigned char* file_content = new unsigned char(len_file);
+		unsigned char* file_content = new unsigned char[len_file];
 		file.read((char*)file_content, len_file * sizeof(unsigned char));
 		this->socket.send_(file_content, len_file * sizeof(unsigned char));
 		
-		//delete file_content;
+		delete[] file_content;
 	}
 }
 
@@ -108,20 +108,22 @@ void Client::pull(char* tag) {
 			// recibo el nombre de hash
 			unsigned int len_name[1];
 			this->socket.receive_((unsigned char*)len_name, sizeof(unsigned int));
-			std::cout << *len_name << std::endl;
-			unsigned char* filename = new unsigned char(*len_name);
+
+			unsigned char* filename = new unsigned char[*len_name + 1];
 			this->socket.receive_(filename, *len_name);
-			std::cout << filename << std::endl;
+			filename[*len_name] = '\0';
+			
 			unsigned int len_file[1];
 			this->socket.receive_((unsigned char*)len_file, sizeof(unsigned int));
 			
-			unsigned char* file = new unsigned char(*len_file);
+			unsigned char* file = new unsigned char[*len_file + 1];
 			this->socket.receive_(file, *len_file);
-			std::cout << file << std::endl;
+			file[*len_file] = '\0';
+			
 			this->save_new_file(filename, file);
 			
-			delete filename;
-			delete file;
+			delete[] filename;
+			delete[] file;
 		}
 	} else {
 		std::cerr << "Error: tag/hash incorrecto." << std::endl;

@@ -21,13 +21,13 @@ void Multi_Client_Acceptor::run() {
 		}
 		this->threads.push_back(new Server(asoc, this->index_file));
 		this->threads[this->threads.size() - 1]->start();
-		
+		/* FALLA
 		for (size_t i = 0; i < this->threads.size(); i++) {
 			if (((Server*)this->threads[i])->has_ended()) {
 				this->threads[i]->join();
 				delete this->threads[i];
 			}
-		}
+		}*/
 	}
 }
 

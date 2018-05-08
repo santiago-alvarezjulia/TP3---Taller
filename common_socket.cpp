@@ -138,7 +138,7 @@ int Socket::receive_(unsigned char* chunk, int sizeof_chunk) {
 	if (!is_open_socket) {
 		return OK;
 	}
-	return ERROR;
+	return bytes_recibidos;
 }
 
 
